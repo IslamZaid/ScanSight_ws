@@ -8,12 +8,19 @@ from robot_base import Robot
 
 
 class UrRtde(Robot):
-    def __init__(self, robot_ip):
+    def __init__(self, robot_ip, read_only=False):
         Robot.__init__(self)
         self.robot_ip = robot_ip
-        self.robot_c = rtde_control.RTDEControlInterface(robot_ip)#urx.Robot(robot_ip, True)
-        self.robot_r = rtde_receive.RTDEReceiveInterface(robot_ip)#urx.Robot(robot_ip, True)
-        self.robot_io = rtde_io.RTDEIOInterface(robot_ip)#urx.Robot(robot_ip, True)
+        self.read_only = read_only
+        # RTDEReceiveInterface is read-only and never conflicts with EtherNet/IP/MODBUS
+        self.robot_r = rtde_receive.RTDEReceiveInterface(robot_ip)
+        if not read_only:
+            # These use input registers and will conflict if EtherNet/IP/MODBUS is active
+            self.robot_c = rtde_control.RTDEControlInterface(robot_ip)
+            self.robot_io = None # rtde_io.RTDEIOInterface(robot_ip)  # Temporarily disabled to avoid register conflict
+        else:
+            self.robot_c = None
+            self.robot_io = None
         
     def move_TCP(self, pose_vec, vel, acc, slow=False):
         if not self.robot_c.moveL((pose_vec[0], pose_vec[1], pose_vec[2], pose_vec[3], pose_vec[4], pose_vec[5]), vel, acc): #TODO: Debug wait
@@ -51,3 +58,22 @@ class UrRtde(Robot):
 
     def get_analog_input(self):
         return self.robot_r.getStandardAnalogInput1()
+
+    def disconnect(self):
+        """Cleanly stop and disconnect all RTDE interfaces."""
+        try:
+            self.robot_c.stopScript()
+        except Exception:
+            pass
+        try:
+            self.robot_c.disconnect()
+        except Exception:
+            pass
+        try:
+            self.robot_r.disconnect()
+        except Exception:
+            pass
+        try:
+            self.robot_io.disconnect()
+        except Exception:
+            pass
