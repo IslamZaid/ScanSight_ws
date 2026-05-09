@@ -6,6 +6,6 @@
   <maintainer email="you@example.com">You</maintainer>
   <license>MIT</license>
   <buildtool_depend>catkin</buildtool_depend>
-  <depend>rospy</depend>
+  <depend>roscpp</depend>
   <depend>dv_ros_msgs</depend>
 </package>

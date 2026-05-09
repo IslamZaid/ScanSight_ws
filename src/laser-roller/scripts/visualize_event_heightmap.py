@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 
 
-EVENT_TOPIC = "/capture_node/events"
+EVENT_TOPIC = "/event_crop/events"
 
 
 def default_recordings_dir():
@@ -37,7 +37,7 @@ def find_latest_bag(recordings_dir):
 
 
 def accumulate_heightmap(bag_path, topic=EVENT_TOPIC, polarity_filter=None,
-                         start_event=0, end_event=1000000):
+                         start_event=0, end_event=10000000):
     """
     Read events from a rosbag and accumulate them into a height map.
 

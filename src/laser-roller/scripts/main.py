@@ -28,8 +28,10 @@ EVENT_TOPIC_WAIT_SECONDS = 10.0
 RECORD_CONFIRM_SECONDS = 2.0
 ROSBAG_BUFFER_MB = 1024
 
-CROP_X_MIN = 0
-CROP_X_MAX = 100
+# max X = 639 and max Y = 479
+
+CROP_X_MIN = 220
+CROP_X_MAX = 260
 CROP_Y_MIN = 0
 CROP_Y_MAX = 480
 
@@ -37,7 +39,7 @@ CATKIN_SETUP = "/home/iz/ur10_ws/devel/setup.bash"
 ROBOT_IP = "192.168.50.110"
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-POSES_FILE = os.path.join(SCRIPT_DIR, "saved_poses.json")
+POSES_FILE = os.path.join(SCRIPT_DIR, "poses_sequence", "saved_poses.json")
 BAG_DIR = os.path.join(SCRIPT_DIR, "recordings")
 
 
@@ -235,9 +237,9 @@ def start_camera_pipeline():
         return None
     print("  ✓ Camera stream live")
 
-    # Event crop
+    # Event crop (C++ node — no Python overhead)
     p = launch_subprocess([
-        "rosrun", "event_crop", "event_crop_node.py",
+        "rosrun", "event_crop", "event_crop_node",
         f"_input_topic:={RAW_EVENT_TOPIC}",
         f"_output_topic:={EVENT_TOPIC}",
         f"_x_min:={CROP_X_MIN}", f"_x_max:={CROP_X_MAX}",
@@ -331,6 +333,7 @@ def mode_record_poses():
             return
 
         print(f"\nRecorded {len(recorded_poses)} poses.")
+        os.makedirs(os.path.dirname(POSES_FILE), exist_ok=True)
         with open(POSES_FILE, "w") as f:
             json.dump(recorded_poses, f, indent=4)
         print(f"Saved to: {POSES_FILE}")
