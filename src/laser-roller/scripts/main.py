@@ -25,9 +25,10 @@ from ur_rtde import UrRtde
 VEL_TOPIC            = "/laser_roller/tcp_velocity"
 VEL_PUBLISH_RATE_HZ  = 100
 
-EVENT_TOPIC          = "/laser_event_processing/events_cropped"
-FILTERED_EVENT_TOPIC = "/laser_event_processing/events_filtered"
-RAW_EVENT_TOPIC      = "/capture_node/events"
+EVENT_TOPIC           = "/laser_event_processing/events_cropped"
+FILTERED_EVENT_TOPIC  = "/laser_event_processing/events_filtered"
+SPATIAL_EVENT_TOPIC   = "/laser_event_processing/events_spatial"
+RAW_EVENT_TOPIC       = "/capture_node/events"
 BAG_NAME_PREFIX = "events_recording"
 EVENT_TOPIC_WAIT_SECONDS = 10.0
 RECORD_CONFIRM_SECONDS = 2.0
@@ -35,8 +36,8 @@ ROSBAG_BUFFER_MB = 1024
 
 # max X = 639 and max Y = 479
 
-CROP_X_MIN = 220
-CROP_X_MAX = 260
+CROP_X_MIN = 220+0
+CROP_X_MAX = 260-20
 CROP_Y_MIN = 0
 CROP_Y_MAX = 480
 
@@ -52,7 +53,7 @@ BAG_DIR = os.path.join(SCRIPT_DIR, "recordings")
 #  TCP velocity publisher
 # ---------------------------------------------------------------------------
 def start_velocity_publisher(robot):
-    pub = rospy.Publisher(VEL_TOPIC, TwistStamped, queue_size=10)
+    pub        = rospy.Publisher(VEL_TOPIC, TwistStamped, queue_size=10)
     stop_event = threading.Event()
 
     def _loop():
@@ -60,7 +61,7 @@ def start_velocity_publisher(robot):
         while not stop_event.is_set() and not rospy.is_shutdown():
             vel = robot.get_vel()  # [vx, vy, vz, wx, wy, wz]
             msg = TwistStamped()
-            msg.header.stamp = rospy.Time.now()
+            msg.header.stamp    = rospy.Time.now()
             msg.twist.linear.x  = vel[0]
             msg.twist.linear.y  = vel[1]
             msg.twist.linear.z  = vel[2]
@@ -167,7 +168,7 @@ def start_event_recording(output_dir):
         "rosbag", "record", "-q",
         "-O", session["temp_bag"],
         "-b", str(ROSBAG_BUFFER_MB),
-        "--tcpnodelay", FILTERED_EVENT_TOPIC, VEL_TOPIC,
+        "--tcpnodelay", FILTERED_EVENT_TOPIC, SPATIAL_EVENT_TOPIC,
     ]
     proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, preexec_fn=os.setsid)
     session["proc"] = proc
@@ -210,6 +211,25 @@ def stop_event_recording(session):
         print(f"Warning: rosbag is still active at: {session['temp_bag']}.active")
     else:
         print(f"Warning: expected rosbag was not found: {session['temp_bag']}")
+
+
+# ---------------------------------------------------------------------------
+#  Recording indicator
+# ---------------------------------------------------------------------------
+def start_recording_indicator():
+    stop = threading.Event()
+
+    def _blink():
+        frames = ["⏺  RECORDING IN PROGRESS", "    RECORDING IN PROGRESS"]
+        i = 0
+        while not stop.is_set():
+            print(f"\r\033[91m{frames[i % 2]}\033[0m  ", end="", flush=True)
+            i += 1
+            time.sleep(0.6)
+        print(f"\r\033[92m✔  Recording stopped.      \033[0m")
+
+    threading.Thread(target=_blink, daemon=True).start()
+    return stop
 
 
 # ---------------------------------------------------------------------------
@@ -294,6 +314,16 @@ def start_camera_pipeline():
         "__name:=event_filter_node",
     ], "event_filter_node")
     procs.append(("event_filter_node", p))
+
+    # Spatial events — convert (x,y,t,p) → (x,y,z,p) using TCP velocity
+    p = launch_subprocess([
+        "rosrun", "laser_event_processing", "event_spatial_node",
+        f"_input_topic:={FILTERED_EVENT_TOPIC}",
+        f"_output_topic:={SPATIAL_EVENT_TOPIC}",
+        f"_velocity_topic:={VEL_TOPIC}",
+        "__name:=event_spatial_node",
+    ], "event_spatial_node")
+    procs.append(("event_spatial_node", p))
 
     # Visualization — full frame
     p = launch_subprocess([
@@ -459,6 +489,7 @@ def mode_play_saved_poses():
 
     vel, acc = 0.05, 0.1
     recording_session = None
+    rec_indicator = None
 
     try:
         print("\n--------------------------------------------------")
@@ -470,28 +501,37 @@ def mode_play_saved_poses():
         for i, pose in enumerate(recorded_poses):
             print(f"  Moving to Pose {i+1}/{len(recorded_poses)}...")
 
-            # Start recording before pose 2
-            if i == 2 and recording_session is None:
+            # Negate velocity on return stroke (pose 4 → 5)
+            if i == 3:
+                rospy.set_param('/event_spatial_node/negate_velocity', True)
+
+            # Start recording with pose 2
+            if i == 2:
                 recording_session = start_event_recording(BAG_DIR)
-                time.sleep(5.0)
+                rec_indicator = start_recording_indicator()
 
-            robot.move_TCP(pose, vel, acc)
-
-            # Stop recording after pose 3
+            # Stop recording at the start of pose 3
             if i == 3 and recording_session is not None:
+                rec_indicator.set()
                 stop_event_recording(recording_session)
                 recording_session = None
+
+            robot.move_TCP(pose, vel, acc)
 
             time.sleep(0.5)
 
         print("\nPlayback complete!")
 
     except KeyboardInterrupt:
+        if rec_indicator is not None:
+            rec_indicator.set()
         print("\nInterrupted by user.")
 
     finally:
         vel_stop.set()
         if recording_session is not None:
+            if rec_indicator is not None:
+                rec_indicator.set()
             stop_event_recording(recording_session)
         stop_camera_pipeline(pipeline_procs)
 

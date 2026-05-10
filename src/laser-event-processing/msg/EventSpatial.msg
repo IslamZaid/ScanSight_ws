@@ -1,5 +1,4 @@
 uint16  x
 uint16  y
-time    ts
+float32 z
 bool    polarity
-float32 velocity
