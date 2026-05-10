@@ -16,11 +16,15 @@ import threading
 from datetime import datetime
 import rospy
 import rosbag
+from geometry_msgs.msg import TwistStamped
 from ur_rtde import UrRtde
 
 # ---------------------------------------------------------------------------
 #  Configuration
 # ---------------------------------------------------------------------------
+VEL_TOPIC            = "/laser_roller/tcp_velocity"
+VEL_PUBLISH_RATE_HZ  = 100
+
 EVENT_TOPIC          = "/laser_event_processing/events_cropped"
 FILTERED_EVENT_TOPIC = "/laser_event_processing/events_filtered"
 RAW_EVENT_TOPIC      = "/capture_node/events"
@@ -42,6 +46,32 @@ ROBOT_IP = "192.168.50.110"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 POSES_FILE = os.path.join(SCRIPT_DIR, "poses_sequence", "saved_poses.json")
 BAG_DIR = os.path.join(SCRIPT_DIR, "recordings")
+
+
+# ---------------------------------------------------------------------------
+#  TCP velocity publisher
+# ---------------------------------------------------------------------------
+def start_velocity_publisher(robot):
+    pub = rospy.Publisher(VEL_TOPIC, TwistStamped, queue_size=10)
+    stop_event = threading.Event()
+
+    def _loop():
+        rate = rospy.Rate(VEL_PUBLISH_RATE_HZ)
+        while not stop_event.is_set() and not rospy.is_shutdown():
+            vel = robot.get_vel()  # [vx, vy, vz, wx, wy, wz]
+            msg = TwistStamped()
+            msg.header.stamp = rospy.Time.now()
+            msg.twist.linear.x  = vel[0]
+            msg.twist.linear.y  = vel[1]
+            msg.twist.linear.z  = vel[2]
+            msg.twist.angular.x = vel[3]
+            msg.twist.angular.y = vel[4]
+            msg.twist.angular.z = vel[5]
+            pub.publish(msg)
+            rate.sleep()
+
+    threading.Thread(target=_loop, daemon=True).start()
+    return stop_event
 
 
 # ---------------------------------------------------------------------------
@@ -137,7 +167,7 @@ def start_event_recording(output_dir):
         "rosbag", "record", "-q",
         "-O", session["temp_bag"],
         "-b", str(ROSBAG_BUFFER_MB),
-        "--tcpnodelay", FILTERED_EVENT_TOPIC,
+        "--tcpnodelay", FILTERED_EVENT_TOPIC, VEL_TOPIC,
     ]
     proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, preexec_fn=os.setsid)
     session["proc"] = proc
@@ -420,8 +450,11 @@ def mode_play_saved_poses():
     rospy.init_node('laser_roller_main', anonymous=True)
     signal.signal(signal.SIGINT, signal.default_int_handler)
 
+    vel_stop = start_velocity_publisher(robot)
+
     pipeline_procs = start_camera_pipeline()
     if pipeline_procs is None:
+        vel_stop.set()
         return
 
     vel, acc = 0.05, 0.1
@@ -457,6 +490,7 @@ def mode_play_saved_poses():
         print("\nInterrupted by user.")
 
     finally:
+        vel_stop.set()
         if recording_session is not None:
             stop_event_recording(recording_session)
         stop_camera_pipeline(pipeline_procs)

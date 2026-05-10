@@ -2,11 +2,15 @@
 <package format="2">
   <name>laser_event_processing</name>
   <version>0.1.0</version>
-  <description>Event camera processing for laser-roller: crop and filter event streams</description>
+  <description>Event camera processing for laser-roller: crop, filter, and velocity-tagged event streams</description>
   <maintainer email="islamasoliman@gmail.com">iz</maintainer>
   <license>MIT</license>
   <buildtool_depend>catkin</buildtool_depend>
   <depend>roscpp</depend>
   <depend>dv_ros_msgs</depend>
   <depend>dv_ros_messaging</depend>
+  <depend>geometry_msgs</depend>
+  <depend>std_msgs</depend>
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
 </package>
