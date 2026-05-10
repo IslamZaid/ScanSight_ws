@@ -21,8 +21,9 @@ from ur_rtde import UrRtde
 # ---------------------------------------------------------------------------
 #  Configuration
 # ---------------------------------------------------------------------------
-EVENT_TOPIC = "/event_crop/events"
-RAW_EVENT_TOPIC = "/capture_node/events"
+EVENT_TOPIC          = "/laser_event_processing/events_cropped"
+FILTERED_EVENT_TOPIC = "/laser_event_processing/events_filtered"
+RAW_EVENT_TOPIC      = "/capture_node/events"
 BAG_NAME_PREFIX = "events_recording"
 EVENT_TOPIC_WAIT_SECONDS = 10.0
 RECORD_CONFIRM_SECONDS = 2.0
@@ -136,14 +137,14 @@ def start_event_recording(output_dir):
         "rosbag", "record", "-q",
         "-O", session["temp_bag"],
         "-b", str(ROSBAG_BUFFER_MB),
-        "--tcpnodelay", EVENT_TOPIC,
+        "--tcpnodelay", FILTERED_EVENT_TOPIC,
     ]
     proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, preexec_fn=os.setsid)
     session["proc"] = proc
     time.sleep(0.5)
     if proc.poll() is not None:
         raise RuntimeError("rosbag record exited immediately.")
-    monitor = EventStreamMonitor(EVENT_TOPIC)
+    monitor = EventStreamMonitor(FILTERED_EVENT_TOPIC)
     session["monitor"] = monitor
     monitor.wait_for_messages(1, RECORD_CONFIRM_SECONDS)
     return session
@@ -172,7 +173,7 @@ def stop_event_recording(session):
     )
     if os.path.exists(session["temp_bag"]):
         os.rename(session["temp_bag"], final_bag)
-        saved_count = get_bag_topic_message_count(final_bag, EVENT_TOPIC)
+        saved_count = get_bag_topic_message_count(final_bag, FILTERED_EVENT_TOPIC)
         count_str = f" ({saved_count} msgs)" if saved_count else ""
         print(f"Saved: {os.path.basename(final_bag)}{count_str}")
     elif os.path.exists(session["temp_bag"] + ".active"):
@@ -239,7 +240,7 @@ def start_camera_pipeline():
 
     # Event crop (C++ node — no Python overhead)
     p = launch_subprocess([
-        "rosrun", "event_crop", "event_crop_node",
+        "rosrun", "laser_event_processing", "event_crop_node",
         f"_input_topic:={RAW_EVENT_TOPIC}",
         f"_output_topic:={EVENT_TOPIC}",
         f"_x_min:={CROP_X_MIN}", f"_x_max:={CROP_X_MAX}",
@@ -248,6 +249,21 @@ def start_camera_pipeline():
         "__name:=event_crop_node",
     ], "event_crop_node")
     procs.append(("event_crop_node", p))
+
+    # Event filter (BA noise filter on the cropped stream)
+    crop_w = CROP_X_MAX - CROP_X_MIN
+    crop_h = CROP_Y_MAX - CROP_Y_MIN
+    p = launch_subprocess([
+        "rosrun", "laser_event_processing", "event_filter_node",
+        f"_input_topic:={EVENT_TOPIC}",
+        f"_output_topic:={FILTERED_EVENT_TOPIC}",
+        f"_sensor_width:={crop_w}",
+        f"_sensor_height:={crop_h}",
+        "_time_window_us:=10000",
+        "_filter_type:=k_noise",
+        "__name:=event_filter_node",
+    ], "event_filter_node")
+    procs.append(("event_filter_node", p))
 
     # Visualization — full frame
     p = launch_subprocess([
@@ -265,6 +281,14 @@ def start_camera_pipeline():
     ], "crop_viz_node (cropped)")
     procs.append(("crop_viz_node", p))
 
+    # Visualization — filtered
+    p = launch_subprocess([
+        "rosrun", "dv_ros_visualization", "visualization_node",
+        "/filter_viz_node/events:=" + FILTERED_EVENT_TOPIC,
+        "__name:=filter_viz_node",
+    ], "filter_viz_node (filtered)")
+    procs.append(("filter_viz_node", p))
+
     # rqt — full
     p = launch_subprocess([
         "rosrun", "rqt_image_view", "rqt_image_view",
@@ -279,12 +303,26 @@ def start_camera_pipeline():
     ], "rqt_image_view (cropped)")
     procs.append(("rqt_image_view (cropped)", p))
 
+    # rqt — filtered
+    p = launch_subprocess([
+        "rosrun", "rqt_image_view", "rqt_image_view",
+        "/filter_viz_node/image",
+    ], "rqt_image_view (filtered)")
+    procs.append(("rqt_image_view (filtered)", p))
+
     # Confirm cropped stream
     if not wait_for_event_stream(EVENT_TOPIC, EVENT_TOPIC_WAIT_SECONDS):
         print("  ✗ Cropped stream not publishing.")
         stop_camera_pipeline(procs)
         return None
     print("  ✓ Cropped stream live")
+
+    # Confirm filtered stream
+    if not wait_for_event_stream(FILTERED_EVENT_TOPIC, EVENT_TOPIC_WAIT_SECONDS):
+        print("  ✗ Filtered stream not publishing.")
+        stop_camera_pipeline(procs)
+        return None
+    print("  ✓ Filtered stream live")
 
     print("\nPipeline ready! Waiting for rqt to load...")
     time.sleep(3)
@@ -380,6 +418,7 @@ def mode_play_saved_poses():
     print("  ✓ Robot connected")
 
     rospy.init_node('laser_roller_main', anonymous=True)
+    signal.signal(signal.SIGINT, signal.default_int_handler)
 
     pipeline_procs = start_camera_pipeline()
     if pipeline_procs is None:
@@ -388,13 +427,13 @@ def mode_play_saved_poses():
     vel, acc = 0.05, 0.1
     recording_session = None
 
-    print("\n--------------------------------------------------")
-    print(f"  {len(recorded_poses)} poses loaded. Robot will move through them.")
-    input("  Stand clear and press Enter to execute (Ctrl+C to cancel) ")
-    print("--------------------------------------------------")
-
-    print("\nPlaying back trajectory...")
     try:
+        print("\n--------------------------------------------------")
+        print(f"  {len(recorded_poses)} poses loaded. Robot will move through them.")
+        input("  Stand clear and press Enter to execute (Ctrl+C to cancel) ")
+        print("--------------------------------------------------")
+
+        print("\nPlaying back trajectory...")
         for i, pose in enumerate(recorded_poses):
             print(f"  Moving to Pose {i+1}/{len(recorded_poses)}...")
 
@@ -430,6 +469,7 @@ def mode_camera_only():
     os.makedirs(BAG_DIR, exist_ok=True)
 
     rospy.init_node('laser_roller_main', anonymous=True)
+    signal.signal(signal.SIGINT, signal.default_int_handler)
 
     print("CAMERA-ONLY RECORDING MODE")
     print(f"  Output: {BAG_DIR}")

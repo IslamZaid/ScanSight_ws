@@ -1,0 +1,19 @@
+<launch>
+  <arg name="input_topic"    default="/laser_event_processing/events_cropped" />
+  <arg name="output_topic"   default="/laser_event_processing/events_filtered" />
+  <arg name="time_window_us" default="10000" />   <!-- 10 ms -->
+  <arg name="min_neighbors"  default="1" />
+  <arg name="radius"         default="1" />        <!-- 3×3 spatial window -->
+  <arg name="sensor_width"   default="346" />
+  <arg name="sensor_height"  default="260" />
+
+  <node pkg="laser_event_processing" type="event_filter_node" name="event_filter_node" output="screen">
+    <param name="input_topic"    value="$(arg input_topic)" />
+    <param name="output_topic"   value="$(arg output_topic)" />
+    <param name="time_window_us" value="$(arg time_window_us)" />
+    <param name="min_neighbors"  value="$(arg min_neighbors)" />
+    <param name="radius"         value="$(arg radius)" />
+    <param name="sensor_width"   value="$(arg sensor_width)" />
+    <param name="sensor_height"  value="$(arg sensor_height)" />
+  </node>
+</launch>

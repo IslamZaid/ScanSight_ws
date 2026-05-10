@@ -1,0 +1,77 @@
+[
+  {
+    "directory": "/home/iz/ur10_ws/build/laser_event_processing",
+    "command": "/usr/bin/g++-13 -DHAVE_PTHREADS=1 -DOS_LINUX=1 -DOS_UNIX=1 -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"laser_event_processing\\\" -D_DEFAULT_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_XOPEN_SOURCE=700 -I/home/iz/ur10_ws/devel/include -I/home/iz/ur10_ws/src/dv-ros/dv_ros_messaging/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I/opt/inivation/boost/include -O3 -DNDEBUG -o CMakeFiles/event_crop_node.dir/src/event_crop_node.cpp.o -c /home/iz/ur10_ws/src/laser-event-processing/src/event_crop_node.cpp",
+    "file": "/home/iz/ur10_ws/src/laser-event-processing/src/event_crop_node.cpp"
+  },
+  {
+    "directory": "/home/iz/ur10_ws/build/laser_event_processing",
+    "command": "/usr/bin/g++-13 -DBOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED -DFMT_SHARED -DHAVE_PTHREADS=1 -DOS_LINUX=1 -DOS_UNIX=1 -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"laser_event_processing\\\" -D_DEFAULT_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_XOPEN_SOURCE=700 -I/home/iz/ur10_ws/devel/include -I/home/iz/ur10_ws/src/dv-ros/dv_ros_messaging/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /opt/inivation/boost/include -isystem /usr/include/opencv4 -isystem /usr/include/eigen3 -isystem /usr/include/libusb-1.0 -O3 -DNDEBUG -std=gnu++20 -o CMakeFiles/event_filter_node.dir/src/event_filter_node.cpp.o -c /home/iz/ur10_ws/src/laser-event-processing/src/event_filter_node.cpp",
+    "file": "/home/iz/ur10_ws/src/laser-event-processing/src/event_filter_node.cpp"
+  },
+  {
+    "directory": "/home/iz/ur10_ws/build/laser_event_processing/gtest/googlemock",
+    "command": "/usr/bin/g++-13 -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgmock_EXPORTS -I/usr/src/googletest/googlemock/include -I/usr/src/googletest/googlemock -isystem /usr/src/googletest/googletest/include -isystem /usr/src/googletest/googletest -O3 -DNDEBUG -fPIC -Wall -Wshadow -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -DGTEST_HAS_PTHREAD=1 -std=c++11 -o CMakeFiles/gmock.dir/src/gmock-all.cc.o -c /usr/src/googletest/googlemock/src/gmock-all.cc",
+    "file": "/usr/src/googletest/googlemock/src/gmock-all.cc"
+  },
+  {
+    "directory": "/home/iz/ur10_ws/build/laser_event_processing/gtest/googlemock",
+    "command": "/usr/bin/g++-13 -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgmock_main_EXPORTS -isystem /usr/src/googletest/googlemock/include -isystem /usr/src/googletest/googlemock -isystem /usr/src/googletest/googletest/include -isystem /usr/src/googletest/googletest -O3 -DNDEBUG -fPIC -Wall -Wshadow -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -DGTEST_HAS_PTHREAD=1 -std=c++11 -o CMakeFiles/gmock_main.dir/src/gmock_main.cc.o -c /usr/src/googletest/googlemock/src/gmock_main.cc",
+    "file": "/usr/src/googletest/googlemock/src/gmock_main.cc"
+  },
+  {
+    "directory": "/home/iz/ur10_ws/build/laser_event_processing/gtest/googletest",
+    "command": "/usr/bin/g++-13 -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgtest_EXPORTS -I/usr/src/googletest/googletest/include -I/usr/src/googletest/googletest -O3 -DNDEBUG -fPIC -Wall -Wshadow -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -std=c++11 -o CMakeFiles/gtest.dir/src/gtest-all.cc.o -c /usr/src/googletest/googletest/src/gtest-all.cc",
+    "file": "/usr/src/googletest/googletest/src/gtest-all.cc"
+  },
+  {
+    "directory": "/home/iz/ur10_ws/build/laser_event_processing/gtest/googletest",
+    "command": "/usr/bin/g++-13 -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgtest_main_EXPORTS -isystem /usr/src/googletest/googletest/include -isystem /usr/src/googletest/googletest -O3 -DNDEBUG -fPIC -Wall -Wshadow -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -DGTEST_HAS_PTHREAD=1 -std=c++11 -o CMakeFiles/gtest_main.dir/src/gtest_main.cc.o -c /usr/src/googletest/googletest/src/gtest_main.cc",
+    "file": "/usr/src/googletest/googletest/src/gtest_main.cc"
+  },
+  {
+    "directory": "/home/iz/ur10_ws/build/dv_ros_msgs/gtest/googlemock",
+    "command": "/usr/bin/g++-13 -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgmock_EXPORTS -I/usr/src/googletest/googlemock/include -I/usr/src/googletest/googlemock -isystem /usr/src/googletest/googletest/include -isystem /usr/src/googletest/googletest -fPIC -Wall -Wshadow -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -DGTEST_HAS_PTHREAD=1 -std=c++11 -o CMakeFiles/gmock.dir/src/gmock-all.cc.o -c /usr/src/googletest/googlemock/src/gmock-all.cc",
+    "file": "/usr/src/googletest/googlemock/src/gmock-all.cc"
+  },
+  {
+    "directory": "/home/iz/ur10_ws/build/dv_ros_msgs/gtest/googlemock",
+    "command": "/usr/bin/g++-13 -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgmock_main_EXPORTS -isystem /usr/src/googletest/googlemock/include -isystem /usr/src/googletest/googlemock -isystem /usr/src/googletest/googletest/include -isystem /usr/src/googletest/googletest -fPIC -Wall -Wshadow -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -DGTEST_HAS_PTHREAD=1 -std=c++11 -o CMakeFiles/gmock_main.dir/src/gmock_main.cc.o -c /usr/src/googletest/googlemock/src/gmock_main.cc",
+    "file": "/usr/src/googletest/googlemock/src/gmock_main.cc"
+  },
+  {
+    "directory": "/home/iz/ur10_ws/build/dv_ros_msgs/gtest/googletest",
+    "command": "/usr/bin/g++-13 -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgtest_EXPORTS -I/usr/src/googletest/googletest/include -I/usr/src/googletest/googletest -fPIC -Wall -Wshadow -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -std=c++11 -o CMakeFiles/gtest.dir/src/gtest-all.cc.o -c /usr/src/googletest/googletest/src/gtest-all.cc",
+    "file": "/usr/src/googletest/googletest/src/gtest-all.cc"
+  },
+  {
+    "directory": "/home/iz/ur10_ws/build/dv_ros_msgs/gtest/googletest",
+    "command": "/usr/bin/g++-13 -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgtest_main_EXPORTS -isystem /usr/src/googletest/googletest/include -isystem /usr/src/googletest/googletest -fPIC -Wall -Wshadow -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -DGTEST_HAS_PTHREAD=1 -std=c++11 -o CMakeFiles/gtest_main.dir/src/gtest_main.cc.o -c /usr/src/googletest/googletest/src/gtest_main.cc",
+    "file": "/usr/src/googletest/googletest/src/gtest_main.cc"
+  },
+  {
+    "directory": "/home/iz/ur10_ws/build/dv_ros_messaging",
+    "command": "/usr/bin/g++-13 -DBOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED -DFMT_SHARED -DHAVE_PTHREADS=1 -DOS_LINUX=1 -DOS_UNIX=1 -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"dv_ros_messaging\\\" -D_DEFAULT_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_XOPEN_SOURCE=700 -I/home/iz/ur10_ws/src/dv-ros/dv_ros_messaging/include -I/home/iz/ur10_ws/devel/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /usr/src/googletest/googletest/include -isystem /usr/src/googletest/googletest -isystem /usr/include/opencv4 -isystem /opt/inivation/boost/include -isystem /usr/include/eigen3 -isystem /usr/include/libusb-1.0 -O3 -DNDEBUG -DGTEST_HAS_PTHREAD=1 -std=gnu++20 -o CMakeFiles/test_messaging.dir/tests/messaging_tests.cpp.o -c /home/iz/ur10_ws/src/dv-ros/dv_ros_messaging/tests/messaging_tests.cpp",
+    "file": "/home/iz/ur10_ws/src/dv-ros/dv_ros_messaging/tests/messaging_tests.cpp"
+  },
+  {
+    "directory": "/home/iz/ur10_ws/build/dv_ros_messaging/gtest/googlemock",
+    "command": "/usr/bin/g++-13 -DGTEST_CREATE_SHARED_LIBRARY=1 -DHAVE_PTHREADS=1 -DOS_LINUX=1 -DOS_UNIX=1 -D_DEFAULT_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_XOPEN_SOURCE=700 -Dgmock_EXPORTS -I/usr/src/googletest/googlemock/include -I/usr/src/googletest/googlemock -isystem /usr/src/googletest/googletest/include -isystem /usr/src/googletest/googletest -O3 -DNDEBUG -fPIC -Wall -Wshadow -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -DGTEST_HAS_PTHREAD=1 -std=c++11 -o CMakeFiles/gmock.dir/src/gmock-all.cc.o -c /usr/src/googletest/googlemock/src/gmock-all.cc",
+    "file": "/usr/src/googletest/googlemock/src/gmock-all.cc"
+  },
+  {
+    "directory": "/home/iz/ur10_ws/build/dv_ros_messaging/gtest/googlemock",
+    "command": "/usr/bin/g++-13 -DGTEST_CREATE_SHARED_LIBRARY=1 -DHAVE_PTHREADS=1 -DOS_LINUX=1 -DOS_UNIX=1 -D_DEFAULT_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_XOPEN_SOURCE=700 -Dgmock_main_EXPORTS -isystem /usr/src/googletest/googlemock/include -isystem /usr/src/googletest/googlemock -isystem /usr/src/googletest/googletest/include -isystem /usr/src/googletest/googletest -O3 -DNDEBUG -fPIC -Wall -Wshadow -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -DGTEST_HAS_PTHREAD=1 -std=c++11 -o CMakeFiles/gmock_main.dir/src/gmock_main.cc.o -c /usr/src/googletest/googlemock/src/gmock_main.cc",
+    "file": "/usr/src/googletest/googlemock/src/gmock_main.cc"
+  },
+  {
+    "directory": "/home/iz/ur10_ws/build/dv_ros_messaging/gtest/googletest",
+    "command": "/usr/bin/g++-13 -DGTEST_CREATE_SHARED_LIBRARY=1 -DHAVE_PTHREADS=1 -DOS_LINUX=1 -DOS_UNIX=1 -D_DEFAULT_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_XOPEN_SOURCE=700 -Dgtest_EXPORTS -I/usr/src/googletest/googletest/include -I/usr/src/googletest/googletest -O3 -DNDEBUG -fPIC -Wall -Wshadow -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -std=c++11 -o CMakeFiles/gtest.dir/src/gtest-all.cc.o -c /usr/src/googletest/googletest/src/gtest-all.cc",
+    "file": "/usr/src/googletest/googletest/src/gtest-all.cc"
+  },
+  {
+    "directory": "/home/iz/ur10_ws/build/dv_ros_messaging/gtest/googletest",
+    "command": "/usr/bin/g++-13 -DGTEST_CREATE_SHARED_LIBRARY=1 -DHAVE_PTHREADS=1 -DOS_LINUX=1 -DOS_UNIX=1 -D_DEFAULT_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_XOPEN_SOURCE=700 -Dgtest_main_EXPORTS -isystem /usr/src/googletest/googletest/include -isystem /usr/src/googletest/googletest -O3 -DNDEBUG -fPIC -Wall -Wshadow -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -DGTEST_HAS_PTHREAD=1 -std=c++11 -o CMakeFiles/gtest_main.dir/src/gtest_main.cc.o -c /usr/src/googletest/googletest/src/gtest_main.cc",
+    "file": "/usr/src/googletest/googletest/src/gtest_main.cc"
+  }
+]

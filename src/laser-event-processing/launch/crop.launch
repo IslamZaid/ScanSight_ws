@@ -1,0 +1,19 @@
+<launch>
+  <arg name="input_topic"  default="/capture_node/events" />
+  <arg name="output_topic" default="/laser_event_processing/events_cropped" />
+  <arg name="x_min" default="0" />
+  <arg name="x_max" default="639" />
+  <arg name="y_min" default="0" />
+  <arg name="y_max" default="479" />
+  <arg name="shift_coordinates" default="true" />
+
+  <node pkg="laser_event_processing" type="event_crop_node" name="event_crop_node" output="screen">
+    <param name="input_topic"        value="$(arg input_topic)" />
+    <param name="output_topic"       value="$(arg output_topic)" />
+    <param name="x_min"              value="$(arg x_min)" />
+    <param name="x_max"              value="$(arg x_max)" />
+    <param name="y_min"              value="$(arg y_min)" />
+    <param name="y_max"              value="$(arg y_max)" />
+    <param name="shift_coordinates"  value="$(arg shift_coordinates)" />
+  </node>
+</launch>
