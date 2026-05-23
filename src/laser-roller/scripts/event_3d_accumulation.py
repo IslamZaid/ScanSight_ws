@@ -42,6 +42,9 @@ CROP_Y_MIN      = 0
 SURFACE_Y_BINS     = 100    # grid resolution along Y (height, mm)
 SURFACE_Z_BINS     = 200    # grid resolution along Z (scan direction, mm)
 SURFACE_MAD_THRESH = 3.0    # reject x values beyond N × MAD from median per cell
+SURFACE_LEVEL      = True   # fit and subtract a best-fit plane (tilt correction)
+SURFACE_SMOOTH     = True   # edge-preserving median smooth (keeps steps sharp)
+SURFACE_SMOOTH_K   = 5      # kernel size in grid cells (odd number, larger = smoother)
 
 # ---------------------------------------------------------------------------
 #  Shared helpers
@@ -387,6 +390,30 @@ def mode_surface(x, y, t_ms, pol, bag_name, topic, axis_label="Z (mm)"):
     print(f"Surface grid: {SURFACE_Y_BINS}×{SURFACE_Z_BINS}  |  "
           f"{valid}/{SURFACE_Y_BINS*SURFACE_Z_BINS} cells filled  |  "
           f"x range: {np.nanmin(surface):.2f} – {np.nanmax(surface):.2f} mm")
+
+    if SURFACE_LEVEL:
+        # fit plane:  x = a*Y + b*Z + c  using least-squares on non-NaN cells
+        mask = ~np.isnan(surface)
+        Y_pts = Y_grid[mask]
+        Z_pts = Z_grid[mask]
+        X_pts = surface[mask]
+        A = np.column_stack([Y_pts, Z_pts, np.ones(len(Y_pts))])
+        coeffs, _, _, _ = np.linalg.lstsq(A, X_pts, rcond=None)
+        plane = coeffs[0] * Y_grid + coeffs[1] * Z_grid + coeffs[2]
+        surface = surface - plane
+        print(f"Levelling: plane tilt  dX/dY={coeffs[0]:.4f}  dX/dZ={coeffs[1]:.4f}  "
+              f"offset={coeffs[2]:.2f} mm  →  residual range: "
+              f"{np.nanmin(surface):.2f} – {np.nanmax(surface):.2f} mm")
+
+    if SURFACE_SMOOTH:
+        from scipy.ndimage import median_filter
+        nan_mask = np.isnan(surface)
+        # fill NaN with local mean so the filter doesn't bleed across holes
+        filled = surface.copy()
+        filled[nan_mask] = np.nanmean(surface)
+        smoothed = median_filter(filled, size=SURFACE_SMOOTH_K)
+        surface = np.where(nan_mask, np.nan, smoothed)
+        print(f"Smoothing: median filter kernel={SURFACE_SMOOTH_K}×{SURFACE_SMOOTH_K}")
 
     fig = go.Figure(go.Surface(
         x=Z_grid,
