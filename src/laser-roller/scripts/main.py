@@ -10,6 +10,7 @@ import json
 import os
 import signal
 import subprocess
+import shlex
 import glob
 import re
 import threading
@@ -41,10 +42,11 @@ CROP_X_MAX = 260-20
 CROP_Y_MIN = 0
 CROP_Y_MAX = 480
 
-CATKIN_SETUP = "/home/iz/ur10_ws/devel/setup.bash"
 ROBOT_IP = "192.168.50.110"
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+WORKSPACE_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "..", ".."))
+CATKIN_SETUP = os.path.join(WORKSPACE_DIR, "devel", "setup.bash")
 POSES_FILE = os.path.join(SCRIPT_DIR, "poses_sequence", "saved_poses.json")
 BAG_DIR = os.path.join(SCRIPT_DIR, "recordings")
 
@@ -236,15 +238,18 @@ def start_recording_indicator():
 #  Helpers — subprocess management
 # ---------------------------------------------------------------------------
 def launch_subprocess(cmd, label):
-    bash_cmd = f"source {CATKIN_SETUP} && {' '.join(cmd)}"
+    if not os.path.isfile(CATKIN_SETUP):
+        print(f"  ✗ {label}: workspace setup not found: {CATKIN_SETUP}")
+        print("    Build the workspace with catkin build first.")
+        return None
+    bash_cmd = f"source {shlex.quote(CATKIN_SETUP)} && exec {shlex.join(cmd)}"
     proc = subprocess.Popen(
         ["bash", "-c", bash_cmd],
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         preexec_fn=os.setsid,
     )
     time.sleep(1.0)
     if proc.poll() is not None:
-        print(f"  ✗ {label} failed")
+        print(f"  ✗ {label} exited with code {proc.returncode}; see output above.")
         return None
     print(f"  ✓ {label}")
     return proc
@@ -279,11 +284,14 @@ def start_camera_pipeline():
         "rosrun", "dv_ros_capture", "capture_node",
         "__name:=capture_node",
     ], "capture_node")
+    if p is None:
+        return None
     procs.append(("capture_node", p))
 
     # Wait for raw stream
     if not wait_for_event_stream(RAW_EVENT_TOPIC, EVENT_TOPIC_WAIT_SECONDS):
-        print("  ✗ Camera not detected. Is it connected?")
+        print(f"  ✗ No events received on {RAW_EVENT_TOPIC} within {EVENT_TOPIC_WAIT_SECONDS}s.")
+        print("    Check the capture_node output above for camera startup errors.")
         stop_camera_pipeline(procs)
         return None
     print("  ✓ Camera stream live")
@@ -595,10 +603,10 @@ def main():
     print("  3) Camera-only recording (no robot)")
     print("==================================================")
 
-    # choice = input("\nSelect mode [1/2/3]: ").strip()
-    choice = '2'
+    choice = input("\nSelect mode [1/2/3]: ").strip()
+    # choice = '2'
 
-    if choice == '1':
+    if choice == '':
         mode_record_poses()
     elif choice == '2':
         mode_play_saved_poses()

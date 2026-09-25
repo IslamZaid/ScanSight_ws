@@ -10,3 +10,5 @@ logs/
 # Local recording artifacts
 src/laser-roller/scripts/recordings/
 *.npz
+*.bag
+*.bag.active
